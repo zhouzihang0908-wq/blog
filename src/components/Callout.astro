@@ -1,0 +1,14 @@
+---
+interface Props { type?: 'info' | 'warning' | 'success' | 'danger' | 'note' | 'quote'; title?: string }
+const { type = 'info', title } = Astro.props;
+const icons = { info: 'i', warning: '!', success: 'ok', danger: 'x', note: '*', quote: '>' };
+---
+<aside class:list={['my-6 rounded-xl border p-4', `callout-${type}`]} style="border-color: var(--border); background: var(--bg-soft);">
+  <div class="flex gap-3">
+    <span class="mt-0.5 shrink-0 font-semibold" aria-hidden="true">{icons[type]}</span>
+    <div class="min-w-0">
+      {title && <p class="!my-0 font-semibold">{title}</p>}
+      <div class="notion-muted"><slot /></div>
+    </div>
+  </div>
+</aside>

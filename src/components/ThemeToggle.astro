@@ -1,0 +1,14 @@
+<button class="notion-pill min-h-11 cursor-pointer" id="theme-toggle" type="button" aria-label="Toggle theme">
+  <span aria-hidden="true">?</span>
+  <span>Theme</span>
+</button>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('#theme-toggle');
+  button?.addEventListener('click', () => {
+    const current = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('theme', next);
+  });
+</script>

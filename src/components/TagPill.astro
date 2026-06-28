@@ -1,0 +1,7 @@
+---
+import { slugify } from '../lib/content';
+interface Props { tag: string; linked?: boolean }
+const { tag, linked = true } = Astro.props;
+const href = `/tags/${slugify(tag)}/`;
+---
+{linked ? <a class="notion-pill" href={href}>#{tag}</a> : <span class="notion-pill">#{tag}</span>}

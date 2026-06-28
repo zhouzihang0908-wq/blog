@@ -1,0 +1,30 @@
+---
+title: "Server operation note template"
+description: "A template for Docker, Nginx, Cloudflare, and automated deployment notes."
+pubDate: 2026-06-27
+tags: ["Server", "Docker", "Nginx"]
+category: "Ops"
+draft: false
+---
+
+import Callout from '../../components/Callout.astro';
+
+This post type is for recording a deployment from goal to verification: environment, configuration, checks, rollback, and troubleshooting.
+
+<Callout type="warning" title="Security note">
+  Do not publish API keys, passwords, SSH private keys, or sensitive server configuration.
+</Callout>
+
+## Recommended structure
+
+1. Environment
+2. Compose services
+3. Nginx configuration
+4. Verification commands
+5. Rollback method
+
+```nginx
+location / {
+  try_files $uri $uri/ =404;
+}
+```

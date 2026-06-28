@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { getPublishedProjects } from '../../lib/content';
+const projects = await getPublishedProjects();
+---
+<BaseLayout title="Projects" description="Personal projects, tools, and experiments.">
+  <header class="mb-8"><p class="notion-pill mb-4 w-fit">Projects</p><h1 class="text-4xl font-semibold tracking-tight">Projects</h1><p class="mt-3 notion-muted">A compact gallery of tools, deployments, and experiments.</p></header>
+  <div class="grid gap-4 md:grid-cols-2">{projects.map((project) => <ProjectCard project={project} />)}</div>
+</BaseLayout>

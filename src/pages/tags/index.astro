@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getTagMap } from '../../lib/content';
+const tags = await getTagMap();
+---
+<BaseLayout title="Tags" description="Browse posts by tag.">
+  <header class="mb-8"><p class="notion-pill mb-4 w-fit">Tags</p><h1 class="text-4xl font-semibold tracking-tight">Tags</h1><p class="mt-3 notion-muted">Topic entry points styled like Notion multi-select values.</p></header>
+  <div class="grid gap-3 md:grid-cols-2">
+    {tags.map(({ tag, slug, posts }) => <a class="notion-card flex items-center justify-between p-4" href={`/tags/${slug}/`}><span>#{tag}</span><span class="notion-pill">{posts.length} posts</span></a>)}
+  </div>
+</BaseLayout>

@@ -1,0 +1,76 @@
+name: Build and deploy blog
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: blog-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type/content check
+        run: pnpm check
+
+      - name: Build static site
+        run: pnpm build
+
+      - name: Audit generated site
+        run: pnpm audit:build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: blog-dist
+          path: dist
+          retention-days: 7
+
+      - name: Deploy to server
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          BLOG_SSH_HOST: ${{ secrets.BLOG_SSH_HOST }}
+          BLOG_SSH_PORT: ${{ secrets.BLOG_SSH_PORT }}
+          BLOG_SSH_USER: ${{ secrets.BLOG_SSH_USER }}
+          BLOG_SSH_KEY: ${{ secrets.BLOG_SSH_KEY }}
+          REMOTE_ROOT: /opt/proxy/blog
+        run: |
+          set -euo pipefail
+          test -n "$BLOG_SSH_HOST"
+          test -n "$BLOG_SSH_PORT"
+          test -n "$BLOG_SSH_USER"
+          test -n "$BLOG_SSH_KEY"
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$BLOG_SSH_KEY" > ~/.ssh/blog_deploy_key
+          chmod 600 ~/.ssh/blog_deploy_key
+          ssh-keyscan -p "$BLOG_SSH_PORT" "$BLOG_SSH_HOST" >> ~/.ssh/known_hosts
+          RELEASE="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
+          SSH="ssh -i ~/.ssh/blog_deploy_key -p $BLOG_SSH_PORT -o IdentitiesOnly=yes $BLOG_SSH_USER@$BLOG_SSH_HOST"
+          RSYNC_RSH="ssh -i ~/.ssh/blog_deploy_key -p $BLOG_SSH_PORT -o IdentitiesOnly=yes"
+          $SSH "mkdir -p $REMOTE_ROOT/releases/$RELEASE"
+          rsync -az --delete -e "$RSYNC_RSH" dist/ "$BLOG_SSH_USER@$BLOG_SSH_HOST:$REMOTE_ROOT/releases/$RELEASE/"
+          $SSH "ln -sfn $REMOTE_ROOT/releases/$RELEASE $REMOTE_ROOT/current && find $REMOTE_ROOT/releases -mindepth 1 -maxdepth 1 -type d | sort -r | tail -n +4 | xargs -r rm -rf"

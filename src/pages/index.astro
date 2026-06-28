@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import TagPill from '../components/TagPill.astro';
+import { getPublishedPosts, getPublishedProjects, getTagMap } from '../lib/content';
+import { SITE } from '../site.config';
+const posts = (await getPublishedPosts()).slice(0, 4);
+const projects = (await getPublishedProjects()).slice(0, 3);
+const tags = (await getTagMap()).slice(0, 12);
+---
+<BaseLayout title="Home" description={SITE.description}>
+  <section class="notion-page py-8 md:py-12">
+    <p class="notion-pill mb-5 w-fit">Notion-style knowledge base</p>
+    <h1 class="text-4xl font-semibold leading-tight tracking-tight md:text-6xl">Personal blog and technical notes</h1>
+    <p class="mt-5 max-w-2xl text-lg leading-9 notion-muted">A lightweight, searchable notebook for AI tools, server operations, research workflows, and personal projects.</p>
+    <div class="mt-7 flex flex-wrap gap-3">
+      <a class="notion-pill min-h-11" href="/posts/">Read posts</a>
+      <a class="notion-pill min-h-11" href="/projects/">View projects</a>
+      <a class="notion-pill min-h-11" href="/rss.xml">RSS</a>
+    </div>
+  </section>
+
+  <section class="mt-8">
+    <div class="mb-4 flex items-center justify-between gap-4">
+      <h2 class="text-2xl font-semibold tracking-tight">Latest posts</h2>
+      <a class="text-sm notion-muted hover:underline" href="/posts/">All posts -></a>
+    </div>
+    <div class="grid gap-4">{posts.map((post) => <ArticleCard post={post} />)}</div>
+  </section>
+
+  <section class="mt-12">
+    <div class="mb-4 flex items-center justify-between gap-4">
+      <h2 class="text-2xl font-semibold tracking-tight">Projects</h2>
+      <a class="text-sm notion-muted hover:underline" href="/projects/">All projects -></a>
+    </div>
+    <div class="grid gap-4 md:grid-cols-3">{projects.map((project) => <ProjectCard project={project} />)}</div>
+  </section>
+
+  <section class="mt-12 notion-card p-5">
+    <h2 class="text-xl font-semibold tracking-tight">Tag database</h2>
+    <p class="mt-2 text-sm notion-muted">Browse topics with Notion-style multi-select pills.</p>
+    <div class="mt-4 flex flex-wrap gap-2">{tags.map(({ tag }) => <TagPill tag={tag} />)}</div>
+  </section>
+</BaseLayout>

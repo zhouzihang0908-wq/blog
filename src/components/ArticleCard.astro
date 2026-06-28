@@ -1,0 +1,22 @@
+---
+import type { PostEntry } from '../lib/content';
+import { entrySlug, formatDate, readingTime } from '../lib/content';
+import TagPill from './TagPill.astro';
+interface Props { post: PostEntry }
+const { post } = Astro.props;
+---
+<article class="notion-card p-5">
+  <a href={`/posts/${entrySlug(post)}/`} class="block">
+    <div class="mb-3 flex flex-wrap items-center gap-2 text-xs notion-muted">
+      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+      <span>?</span>
+      <span>{readingTime(post.body)}</span>
+      {post.data.pinned && <span class="notion-pill">Pinned</span>}
+    </div>
+    <h2 class="text-xl font-semibold tracking-tight">{post.data.title}</h2>
+    <p class="mt-2 line-clamp-2 text-sm leading-7 notion-muted">{post.data.description}</p>
+  </a>
+  <div class="mt-4 flex flex-wrap gap-2">
+    {post.data.tags.map((tag) => <TagPill tag={tag} />)}
+  </div>
+</article>

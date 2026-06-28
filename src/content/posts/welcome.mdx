@@ -1,0 +1,42 @@
+---
+title: "Blog launch: a Notion-style personal knowledge base"
+description: "A first post that validates MDX, callouts, code blocks, tables, tags, RSS, search, and SEO."
+pubDate: 2026-06-28
+updatedDate: 2026-06-28
+tags: ["Blog", "Astro", "Notion"]
+category: "Site"
+pinned: true
+draft: false
+---
+
+import Callout from '../../components/Callout.astro';
+
+This blog records server operations, AI tooling, research workflows, and personal projects. The first version is fully static: pages are built ahead of time and Nginx only serves files.
+
+<Callout type="info" title="Design target">
+  The visual language should feel like a Notion document or knowledge base: quiet, spacious, low-saturation, and focused on reading.
+</Callout>
+
+## Stack
+
+| Module | Choice | Note |
+| --- | --- | --- |
+| Framework | Astro | Static-first and fast |
+| Content | MDX | Markdown plus components |
+| Styling | Tailwind plus CSS variables | Shared light and dark themes |
+| Search | Pagefind | Static index generated at build time |
+
+## Code block test
+
+```bash
+pnpm install
+pnpm build
+pnpm audit:build
+```
+
+## Next steps
+
+- Add more server operation notes
+- Add research workflow posts
+- Document personal tools
+- Add comments or analytics only when needed

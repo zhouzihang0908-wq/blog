@@ -1,0 +1,49 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Callout from '../../components/Callout.astro';
+import TagPill from '../../components/TagPill.astro';
+import { entrySlug, formatDate, getPublishedPosts, readingTime } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: entrySlug(post) }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const allPosts = await getPublishedPosts();
+const index = allPosts.findIndex((item) => entrySlug(item) === entrySlug(post));
+const prev = allPosts[index + 1];
+const next = allPosts[index - 1];
+---
+<BaseLayout title={post.data.seoTitle ?? post.data.title} description={post.data.seoDescription ?? post.data.description} image={post.data.cover ?? '/og-default.svg'} type="article">
+  <article>
+    <header class="mb-8">
+      <div class="mb-4 flex flex-wrap gap-2">{post.data.tags.map((tag) => <TagPill tag={tag} />)}</div>
+      <h1 class="text-4xl font-semibold leading-tight tracking-tight md:text-5xl">{post.data.title}</h1>
+      <p class="mt-4 text-lg leading-8 notion-muted">{post.data.description}</p>
+      <div class="mt-5 flex flex-wrap items-center gap-2 text-sm notion-muted">
+        <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+        {post.data.updatedDate && <><span>?</span><span>Updated {formatDate(post.data.updatedDate)}</span></>}
+        <span>?</span><span>{readingTime(post.body)}</span>
+      </div>
+    </header>
+
+    {headings.length > 1 && (
+      <aside class="notion-card mb-8 p-4" data-pagefind-ignore>
+        <p class="mb-3 text-sm font-semibold">Table of contents</p>
+        <nav class="grid gap-2 text-sm notion-muted" aria-label="Table of contents">
+          {headings.filter((heading) => heading.depth > 1 && heading.depth < 4).map((heading) => <a class:list={[heading.depth === 3 && 'pl-4', 'hover:underline']} href={`#${heading.slug}`}>{heading.text}</a>)}
+        </nav>
+      </aside>
+    )}
+
+    <div class="prose-notion"><Content components={{ Callout }} /></div>
+
+    <nav class="mt-12 grid gap-3 border-t pt-6 md:grid-cols-2" style="border-color: var(--border);" data-pagefind-ignore>
+      {prev ? <a class="notion-card p-4" href={`/posts/${entrySlug(prev)}/`}><span class="text-sm notion-muted">Previous</span><p class="mt-1 font-medium">{prev.data.title}</p></a> : <div></div>}
+      {next ? <a class="notion-card p-4 md:text-right" href={`/posts/${entrySlug(next)}/`}><span class="text-sm notion-muted">Next</span><p class="mt-1 font-medium">{next.data.title}</p></a> : <div></div>}
+    </nav>
+  </article>
+</BaseLayout>
