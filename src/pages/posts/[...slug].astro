@@ -25,8 +25,8 @@ const next = allPosts[index - 1];
       <p class="mt-4 text-lg leading-8 notion-muted">{post.data.description}</p>
       <div class="mt-5 flex flex-wrap items-center gap-2 text-sm notion-muted">
         <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
-        {post.data.updatedDate && <><span>?</span><span>Updated {formatDate(post.data.updatedDate)}</span></>}
-        <span>?</span><span>{readingTime(post.body)}</span>
+        {post.data.updatedDate && <><span aria-hidden="true">&middot;</span><span>Updated {formatDate(post.data.updatedDate)}</span></>}
+        <span aria-hidden="true">&middot;</span><span>{readingTime(post.body)}</span>
       </div>
     </header>
 

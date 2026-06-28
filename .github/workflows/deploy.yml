@@ -1,6 +1,7 @@
 name: Build and deploy blog
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
@@ -22,7 +23,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 11.7.0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -74,3 +75,4 @@ jobs:
           $SSH "mkdir -p $REMOTE_ROOT/releases/$RELEASE"
           rsync -az --delete -e "$RSYNC_RSH" dist/ "$BLOG_SSH_USER@$BLOG_SSH_HOST:$REMOTE_ROOT/releases/$RELEASE/"
           $SSH "ln -sfn $REMOTE_ROOT/releases/$RELEASE $REMOTE_ROOT/current && find $REMOTE_ROOT/releases -mindepth 1 -maxdepth 1 -type d | sort -r | tail -n +4 | xargs -r rm -rf"
+          $SSH "test -f $REMOTE_ROOT/current/index.html && test -f $REMOTE_ROOT/current/rss.xml && test -f $REMOTE_ROOT/current/404.html"

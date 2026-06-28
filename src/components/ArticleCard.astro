@@ -9,7 +9,7 @@ const { post } = Astro.props;
   <a href={`/posts/${entrySlug(post)}/`} class="block">
     <div class="mb-3 flex flex-wrap items-center gap-2 text-xs notion-muted">
       <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
-      <span>?</span>
+      <span aria-hidden="true">&middot;</span>
       <span>{readingTime(post.body)}</span>
       {post.data.pinned && <span class="notion-pill">Pinned</span>}
     </div>

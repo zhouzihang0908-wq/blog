@@ -3,11 +3,13 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
 import { SITE } from '../site.config';
-interface Props { title?: string; description?: string; image?: string; type?: string; noindex?: boolean; }
-const { title = SITE.title, description = SITE.description, image = '/og-default.svg', type = 'website', noindex = false } = Astro.props;
+interface Props { title?: string; description?: string; image?: string; type?: string; noindex?: boolean; pagefind?: boolean; }
+const { title = SITE.title, description = SITE.description, image = '/og-default.svg', type = 'website', noindex = false, pagefind } = Astro.props;
 const pageTitle = title === SITE.title ? `${SITE.title} - Personal blog and technical notes` : `${title} - ${SITE.title}`;
 const canonical = new URL(Astro.url.pathname, SITE.url).toString();
 const ogImage = image.startsWith('http') ? image : new URL(image, SITE.url).toString();
+const rssUrl = new URL('/rss.xml', SITE.url).toString();
+const includePagefindBody = pagefind ?? !noindex;
 ---
 <!doctype html>
 <html lang="zh-CN">
@@ -27,7 +29,7 @@ const ogImage = image.startsWith('http') ? image : new URL(image, SITE.url).toSt
     <meta name="robots" content={noindex ? 'noindex,nofollow' : 'index,follow'} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href={rssUrl} />
     <meta property="og:type" content={type} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
@@ -41,7 +43,7 @@ const ogImage = image.startsWith('http') ? image : new URL(image, SITE.url).toSt
   </head>
   <body>
     <Header />
-    <main class="notion-shell notion-page py-10 md:py-14" data-pagefind-body><slot /></main>
+    <main class="notion-shell notion-page py-10 md:py-14" data-pagefind-body={includePagefindBody ? true : undefined}><slot /></main>
     <Footer />
     <script is:inline>
       (() => {

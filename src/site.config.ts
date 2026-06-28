@@ -16,6 +16,6 @@ export const SITE = {
   ],
   socials: [
     { label: 'GitHub', href: 'https://github.com/zhouzihang0908-wq' },
-    { label: 'RSS', href: '/rss.xml' }
+    { label: 'RSS', href: 'https://blog.zzhgod.top/rss.xml' }
   ]
 } as const;
