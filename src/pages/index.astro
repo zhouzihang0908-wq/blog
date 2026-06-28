@@ -9,37 +9,37 @@ const posts = (await getPublishedPosts()).slice(0, 4);
 const projects = (await getPublishedProjects()).slice(0, 3);
 const tags = (await getTagMap()).slice(0, 12);
 ---
-<BaseLayout title="Home" description={SITE.description}>
+<BaseLayout title="首页" description={SITE.description}>
   <section class="notion-page py-8 md:py-12">
-    <p class="notion-pill mb-5 w-fit">Notion-style knowledge base</p>
-    <h1 class="text-4xl font-semibold leading-tight tracking-tight md:text-5xl">Personal blog and technical notes</h1>
-    <p class="mt-5 max-w-2xl text-lg leading-9 notion-muted">A lightweight, searchable notebook for AI tools, server operations, research workflows, and personal projects.</p>
+    <p class="notion-pill mb-5 w-fit">Notion 风格知识库</p>
+    <h1 class="text-4xl font-semibold leading-tight tracking-tight md:text-5xl">个人博客与技术笔记</h1>
+    <p class="mt-5 max-w-2xl text-lg leading-9 notion-muted">一个轻量、可搜索的个人知识库，用来记录 AI 工具、服务器运维、研究流程与项目复盘。</p>
     <div class="mt-7 flex flex-wrap gap-3">
-      <a class="notion-pill min-h-11" href="/posts/">Read posts</a>
-      <a class="notion-pill min-h-11" href="/projects/">View projects</a>
+      <a class="notion-pill min-h-11" href="/posts/">阅读文章</a>
+      <a class="notion-pill min-h-11" href="/projects/">查看项目</a>
       <a class="notion-pill min-h-11" href="https://blog.zzhgod.top/rss.xml">RSS</a>
     </div>
   </section>
 
   <section class="mt-8">
     <div class="mb-4 flex items-center justify-between gap-4">
-      <h2 class="text-2xl font-semibold tracking-tight">Latest posts</h2>
-      <a class="text-sm notion-muted hover:underline" href="/posts/">All posts -></a>
+      <h2 class="text-2xl font-semibold tracking-tight">最新文章</h2>
+      <a class="text-sm notion-muted hover:underline" href="/posts/">全部文章 -&gt;</a>
     </div>
     <div class="grid gap-4">{posts.map((post) => <ArticleCard post={post} />)}</div>
   </section>
 
   <section class="mt-12">
     <div class="mb-4 flex items-center justify-between gap-4">
-      <h2 class="text-2xl font-semibold tracking-tight">Projects</h2>
-      <a class="text-sm notion-muted hover:underline" href="/projects/">All projects -></a>
+      <h2 class="text-2xl font-semibold tracking-tight">项目入口</h2>
+      <a class="text-sm notion-muted hover:underline" href="/projects/">全部项目 -&gt;</a>
     </div>
     <div class="grid gap-4 md:grid-cols-3">{projects.map((project) => <ProjectCard project={project} />)}</div>
   </section>
 
   <section class="mt-12 notion-card p-5">
-    <h2 class="text-xl font-semibold tracking-tight">Tag database</h2>
-    <p class="mt-2 text-sm notion-muted">Browse topics with Notion-style multi-select pills.</p>
+    <h2 class="text-xl font-semibold tracking-tight">标签数据库</h2>
+    <p class="mt-2 text-sm notion-muted">用 Notion 风格的多选标签浏览主题。</p>
     <div class="mt-4 flex flex-wrap gap-2">{tags.map(({ tag }) => <TagPill tag={tag} />)}</div>
   </section>
 </BaseLayout>

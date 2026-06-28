@@ -11,7 +11,7 @@ const { post } = Astro.props;
       <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
       <span aria-hidden="true">&middot;</span>
       <span>{readingTime(post.body)}</span>
-      {post.data.pinned && <span class="notion-pill">Pinned</span>}
+      {post.data.pinned && <span class="notion-pill">置顶</span>}
     </div>
     <h2 class="text-xl font-semibold tracking-tight">{post.data.title}</h2>
     <p class="mt-2 line-clamp-2 text-sm leading-7 notion-muted">{post.data.description}</p>

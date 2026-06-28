@@ -59,7 +59,7 @@ for (const forbidden of ['/404', '/search', 'draft']) {
   }
 }
 
-const forbiddenDraftNeedles = ['Draft example', 'draft-example', 'This draft should'];
+const forbiddenDraftNeedles = ['Draft example', 'draft-example', 'This draft should', '草稿示例', '这篇草稿不应该'];
 const htmlFiles = [];
 const walk = (dir, prefix = '') => {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -81,7 +81,7 @@ for (const file of htmlFiles) {
 }
 
 const pagefindMeta = read('pagefind/pagefind-entry.json');
-for (const needle of ['draft-example', 'Draft example']) {
+for (const needle of ['draft-example', 'Draft example', '草稿示例']) {
   if (pagefindMeta.includes(needle)) {
     console.error(`Draft content leaked into Pagefind metadata: ${needle}`);
     process.exit(1);

@@ -1,32 +1,32 @@
 ---
-title: "Blog launch: a Notion-style personal knowledge base"
-description: "A first post that validates MDX, callouts, code blocks, tables, tags, RSS, search, and SEO."
+title: "博客上线：Notion 风格个人知识库"
+description: "第一篇文章用于验证 MDX、Callout、代码块、表格、标签、RSS、搜索与 SEO。"
 pubDate: 2026-06-28
 updatedDate: 2026-06-28
-tags: ["Blog", "Astro", "Notion"]
-category: "Site"
+tags: ["博客", "Astro", "Notion"]
+category: "站点"
 pinned: true
 draft: false
 ---
 
 import Callout from '../../components/Callout.astro';
 
-This blog records server operations, AI tooling, research workflows, and personal projects. The first version is fully static: pages are built ahead of time and Nginx only serves files.
+这个博客用来记录服务器运维、AI 工具、研究流程和个人项目。第一版是完全静态的：页面在构建阶段生成，服务器上的 Nginx 只负责分发文件。
 
-<Callout type="info" title="Design target">
-  The visual language should feel like a Notion document or knowledge base: quiet, spacious, low-saturation, and focused on reading.
+<Callout type="info" title="设计目标">
+  视觉语言尽量接近 Notion 文档或知识库：安静、留白充足、低饱和、以阅读为中心。
 </Callout>
 
-## Stack
+## 技术栈
 
-| Module | Choice | Note |
+| 模块 | 选择 | 说明 |
 | --- | --- | --- |
-| Framework | Astro | Static-first and fast |
-| Content | MDX | Markdown plus components |
-| Styling | Tailwind plus CSS variables | Shared light and dark themes |
-| Search | Pagefind | Static index generated at build time |
+| 框架 | Astro | 静态优先，构建速度快 |
+| 内容 | MDX | Markdown 加组件 |
+| 样式 | Tailwind 与 CSS 变量 | 统一亮色和暗色主题 |
+| 搜索 | Pagefind | 构建时生成静态索引 |
 
-## Code block test
+## 代码块测试
 
 ```bash
 pnpm install
@@ -34,9 +34,9 @@ pnpm build
 pnpm audit:build
 ```
 
-## Next steps
+## 下一步
 
-- Add more server operation notes
-- Add research workflow posts
-- Document personal tools
-- Add comments or analytics only when needed
+- 增加更多服务器运维笔记
+- 补充研究流程文章
+- 记录个人工具与项目复盘
+- 只在确实需要时再加入评论或统计

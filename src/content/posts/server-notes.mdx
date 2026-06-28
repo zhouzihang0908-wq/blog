@@ -1,27 +1,27 @@
 ---
-title: "Server operation note template"
-description: "A template for Docker, Nginx, Cloudflare, and automated deployment notes."
+title: "服务器运维笔记模板"
+description: "用于记录 Docker、Nginx、Cloudflare 与自动部署的运维模板。"
 pubDate: 2026-06-27
-tags: ["Server", "Docker", "Nginx"]
-category: "Ops"
+tags: ["服务器", "Docker", "Nginx"]
+category: "运维"
 draft: false
 ---
 
 import Callout from '../../components/Callout.astro';
 
-This post type is for recording a deployment from goal to verification: environment, configuration, checks, rollback, and troubleshooting.
+这类文章用于从目标到验证完整记录一次部署：环境、配置、检查、回滚和故障排查。
 
-<Callout type="warning" title="Security note">
-  Do not publish API keys, passwords, SSH private keys, or sensitive server configuration.
+<Callout type="warning" title="安全提醒">
+  不要公开 API Key、密码、SSH 私钥或敏感服务器配置。
 </Callout>
 
-## Recommended structure
+## 推荐结构
 
-1. Environment
-2. Compose services
-3. Nginx configuration
-4. Verification commands
-5. Rollback method
+1. 环境信息
+2. Compose 服务
+3. Nginx 配置
+4. 验证命令
+5. 回滚方法
 
 ```nginx
 location / {

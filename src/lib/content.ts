@@ -32,7 +32,7 @@ export function readingTime(body = '') {
   const chineseChars = (body.match(/[\u4e00-\u9fff]/g) ?? []).length;
   const latinWords = (body.replace(/[\u4e00-\u9fff]/g, ' ').match(/[A-Za-z0-9_]+/g) ?? []).length;
   const minutes = Math.max(1, Math.ceil((chineseChars / 450) + (latinWords / 220)));
-  return `${minutes} min read`;
+  return `${minutes} 分钟阅读`;
 }
 
 export function slugify(value: string) {

@@ -25,15 +25,15 @@ const next = allPosts[index - 1];
       <p class="mt-4 text-lg leading-8 notion-muted">{post.data.description}</p>
       <div class="mt-5 flex flex-wrap items-center gap-2 text-sm notion-muted">
         <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
-        {post.data.updatedDate && <><span aria-hidden="true">&middot;</span><span>Updated {formatDate(post.data.updatedDate)}</span></>}
+        {post.data.updatedDate && <><span aria-hidden="true">&middot;</span><span>更新于 {formatDate(post.data.updatedDate)}</span></>}
         <span aria-hidden="true">&middot;</span><span>{readingTime(post.body)}</span>
       </div>
     </header>
 
     {headings.length > 1 && (
       <aside class="notion-card mb-8 p-4" data-pagefind-ignore>
-        <p class="mb-3 text-sm font-semibold">Table of contents</p>
-        <nav class="grid gap-2 text-sm notion-muted" aria-label="Table of contents">
+        <p class="mb-3 text-sm font-semibold">目录</p>
+        <nav class="grid gap-2 text-sm notion-muted" aria-label="目录">
           {headings.filter((heading) => heading.depth > 1 && heading.depth < 4).map((heading) => <a class:list={[heading.depth === 3 && 'pl-4', 'hover:underline']} href={`#${heading.slug}`}>{heading.text}</a>)}
         </nav>
       </aside>
@@ -42,8 +42,8 @@ const next = allPosts[index - 1];
     <div class="prose-notion"><Content components={{ Callout }} /></div>
 
     <nav class="mt-12 grid gap-3 border-t pt-6 md:grid-cols-2" style="border-color: var(--border);" data-pagefind-ignore>
-      {prev ? <a class="notion-card p-4" href={`/posts/${entrySlug(prev)}/`}><span class="text-sm notion-muted">Previous</span><p class="mt-1 font-medium">{prev.data.title}</p></a> : <div></div>}
-      {next ? <a class="notion-card p-4 md:text-right" href={`/posts/${entrySlug(next)}/`}><span class="text-sm notion-muted">Next</span><p class="mt-1 font-medium">{next.data.title}</p></a> : <div></div>}
+      {prev ? <a class="notion-card p-4" href={`/posts/${entrySlug(prev)}/`}><span class="text-sm notion-muted">上一篇</span><p class="mt-1 font-medium">{prev.data.title}</p></a> : <div></div>}
+      {next ? <a class="notion-card p-4 md:text-right" href={`/posts/${entrySlug(next)}/`}><span class="text-sm notion-muted">下一篇</span><p class="mt-1 font-medium">{next.data.title}</p></a> : <div></div>}
     </nav>
   </article>
 </BaseLayout>

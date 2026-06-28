@@ -3,17 +3,18 @@ import type { ProjectEntry } from '../lib/content';
 import TagPill from './TagPill.astro';
 interface Props { project: ProjectEntry }
 const { project } = Astro.props;
+const statusText = { active: '进行中', done: '已完成', archived: '已归档' }[project.data.status] ?? project.data.status;
 ---
 <article class="notion-card flex h-full flex-col p-5">
   <div class="mb-3 flex items-center justify-between gap-3">
-    <span class="notion-pill">{project.data.status}</span>
+    <span class="notion-pill">{statusText}</span>
     <time class="text-xs notion-muted" datetime={project.data.pubDate.toISOString()}>{project.data.pubDate.getFullYear()}</time>
   </div>
   <h2 class="text-xl font-semibold tracking-tight">{project.data.title}</h2>
   <p class="mt-2 flex-1 text-sm leading-7 notion-muted">{project.data.description}</p>
   <div class="mt-4 flex flex-wrap gap-2">{project.data.tags.map((tag) => <TagPill tag={tag} linked={false} />)}</div>
   <div class="mt-5 flex flex-wrap gap-3 text-sm">
-    {project.data.demo && <a class="notion-pill" href={project.data.demo} target="_blank" rel="noreferrer">Demo -&gt;</a>}
+    {project.data.demo && <a class="notion-pill" href={project.data.demo} target="_blank" rel="noreferrer">演示 -&gt;</a>}
     {project.data.repo && <a class="notion-pill" href={project.data.repo} target="_blank" rel="noreferrer">GitHub -&gt;</a>}
   </div>
 </article>

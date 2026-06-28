@@ -5,7 +5,7 @@ import '../styles/global.css';
 import { SITE } from '../site.config';
 interface Props { title?: string; description?: string; image?: string; type?: string; noindex?: boolean; pagefind?: boolean; }
 const { title = SITE.title, description = SITE.description, image = '/og-default.svg', type = 'website', noindex = false, pagefind } = Astro.props;
-const pageTitle = title === SITE.title ? `${SITE.title} - Personal blog and technical notes` : `${title} - ${SITE.title}`;
+const pageTitle = title === SITE.title ? `${SITE.title} - 个人博客与技术笔记` : `${title} - ${SITE.title}`;
 const canonical = new URL(Astro.url.pathname, SITE.url).toString();
 const ogImage = image.startsWith('http') ? image : new URL(image, SITE.url).toString();
 const rssUrl = new URL('/rss.xml', SITE.url).toString();
@@ -54,11 +54,11 @@ const includePagefindBody = pagefind ?? !noindex;
           const button = document.createElement('button');
           button.className = 'copy-code-button';
           button.type = 'button';
-          button.textContent = 'Copy';
+          button.textContent = '复制';
           button.addEventListener('click', async () => {
             await navigator.clipboard.writeText(code.textContent || '');
-            button.textContent = 'Copied';
-            setTimeout(() => (button.textContent = 'Copy'), 1600);
+            button.textContent = '已复制';
+            setTimeout(() => (button.textContent = '复制'), 1600);
           });
           pre.appendChild(button);
         }

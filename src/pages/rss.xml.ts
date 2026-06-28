@@ -5,7 +5,7 @@ import { SITE } from '../site.config';
 export async function GET(context: { site?: URL }) {
   const posts = await getPublishedPosts();
   return rss({
-    title: `${SITE.title} - Personal blog and technical notes`,
+    title: `${SITE.title} - 个人博客与技术笔记`,
     description: SITE.description,
     site: context.site ?? SITE.url,
     customData: '<language>zh-CN</language>',

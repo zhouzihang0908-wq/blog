@@ -1,17 +1,17 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="Search" description="Search posts, tags, and projects." noindex={true}>
-  <header class="mb-8"><p class="notion-pill mb-4 w-fit">Search</p><h1 class="text-4xl font-semibold tracking-tight">Search</h1><p class="mt-3 notion-muted">Local static search with no backend service.</p></header>
+<BaseLayout title="搜索" description="搜索文章、标签与项目。" noindex={true}>
+  <header class="mb-8"><p class="notion-pill mb-4 w-fit">搜索</p><h1 class="text-4xl font-semibold tracking-tight">搜索</h1><p class="mt-3 notion-muted">本地静态搜索，不依赖后端服务。</p></header>
   <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
   <div id="search" class="notion-card p-4"></div>
   <script is:inline src="/pagefind/pagefind-ui.js"></script>
   <script is:inline>
     window.addEventListener('DOMContentLoaded', () => {
       if (window.PagefindUI) {
-        new window.PagefindUI({ element: '#search', showSubResults: true, showImages: false, translations: { placeholder: 'Search posts, projects, tags...', zero_results: 'No results found', clear_search: 'Clear' } });
+        new window.PagefindUI({ element: '#search', showSubResults: true, showImages: false, translations: { placeholder: '搜索文章、项目、标签...', zero_results: '没有找到结果', clear_search: '清除' } });
       } else {
-        document.querySelector('#search').textContent = 'Search index has not been generated yet. Run pnpm build first.';
+        document.querySelector('#search').textContent = '搜索索引尚未生成，请先运行 pnpm build。';
       }
     });
   </script>

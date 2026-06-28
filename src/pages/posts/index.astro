@@ -4,11 +4,11 @@ import ArticleCard from '../../components/ArticleCard.astro';
 import { getPublishedPosts } from '../../lib/content';
 const posts = await getPublishedPosts();
 ---
-<BaseLayout title="Posts" description="All published posts and technical notes.">
+<BaseLayout title="文章" description="全部已发布文章与技术笔记。">
   <header class="mb-8">
-    <p class="notion-pill mb-4 w-fit">Posts</p>
-    <h1 class="text-4xl font-semibold tracking-tight">Posts</h1>
-    <p class="mt-3 notion-muted">{posts.length} published posts, sorted by date.</p>
+    <p class="notion-pill mb-4 w-fit">文章</p>
+    <h1 class="text-4xl font-semibold tracking-tight">文章</h1>
+    <p class="mt-3 notion-muted">共 {posts.length} 篇已发布内容，按时间倒序排列。</p>
   </header>
   <div class="grid gap-4">{posts.map((post) => <ArticleCard post={post} />)}</div>
 </BaseLayout>

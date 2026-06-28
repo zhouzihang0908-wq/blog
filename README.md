@@ -1,6 +1,6 @@
-# zzhgod Notion-style personal blog
+# zzhgod Notion 风格个人博客
 
-Astro + MDX + Tailwind + Pagefind static blog for `https://blog.zzhgod.top`.
+这是部署在 `https://blog.zzhgod.top` 的 Astro + MDX + Tailwind + Pagefind 静态博客。
 
 ## Development
 
@@ -19,15 +19,15 @@ pnpm audit:build
 
 ## Writing
 
-Add `.mdx` files in `src/content/posts/`. Production builds exclude posts with `draft: true`.
+在 `src/content/posts/` 添加 `.mdx` 文件。生产构建会排除 `draft: true` 的草稿。
 
 ## Deployment
 
-GitHub Actions builds `main`, uploads to `/opt/proxy/blog/releases/<version>`, then updates `/opt/proxy/blog/current`.
+GitHub Actions 会构建 `main` 分支，上传到 `/opt/proxy/blog/releases/<version>`，再更新 `/opt/proxy/blog/current`。
 
-Required GitHub Secrets:
+需要的 GitHub Secrets：
 
 - `BLOG_SSH_HOST`
 - `BLOG_SSH_PORT`
 - `BLOG_SSH_USER`
-- `BLOG_SSH_KEY`
+- `BLOG_SSH_KEY_B64`
