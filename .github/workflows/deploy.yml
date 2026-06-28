@@ -56,17 +56,17 @@ jobs:
           BLOG_SSH_HOST: ${{ secrets.BLOG_SSH_HOST }}
           BLOG_SSH_PORT: ${{ secrets.BLOG_SSH_PORT }}
           BLOG_SSH_USER: ${{ secrets.BLOG_SSH_USER }}
-          BLOG_SSH_KEY: ${{ secrets.BLOG_SSH_KEY }}
+          BLOG_SSH_KEY_B64: ${{ secrets.BLOG_SSH_KEY_B64 }}
           REMOTE_ROOT: /opt/proxy/blog
         run: |
           set -euo pipefail
           test -n "$BLOG_SSH_HOST"
           test -n "$BLOG_SSH_PORT"
           test -n "$BLOG_SSH_USER"
-          test -n "$BLOG_SSH_KEY"
+          test -n "$BLOG_SSH_KEY_B64"
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          printf '%s\n' "$BLOG_SSH_KEY" > ~/.ssh/blog_deploy_key
+          printf '%s' "$BLOG_SSH_KEY_B64" | base64 -d > ~/.ssh/blog_deploy_key
           chmod 600 ~/.ssh/blog_deploy_key
           ssh-keyscan -p "$BLOG_SSH_PORT" "$BLOG_SSH_HOST" >> ~/.ssh/known_hosts
           RELEASE="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
