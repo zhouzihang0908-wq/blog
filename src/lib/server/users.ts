@@ -11,6 +11,8 @@ const userInputSchema = z.object({
   role: z.enum(['user', 'admin']).optional().default('user')
 });
 
+const DEFAULT_ADMIN_NAME = '站点管理员';
+
 export interface CreateUserInput {
   email: string;
   name: string;
@@ -30,6 +32,10 @@ interface UserRow {
 
 export function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
+}
+
+function isPlaceholderAdminName(name: string) {
+  return name.trim() === '' || /^\?+$/.test(name.trim());
 }
 
 function rowToUser(row: UserRow): DbUser {
@@ -76,7 +82,7 @@ export async function createUser(db: Database.Database, input: CreateUserInput) 
 export async function ensureAdminUser(db: Database.Database, input: { email: string; password: string; name?: string }) {
   const parsed = userInputSchema.parse({
     email: input.email,
-    name: input.name || '站点管理员',
+    name: input.name || DEFAULT_ADMIN_NAME,
     password: input.password,
     role: 'admin'
   });
@@ -85,11 +91,19 @@ export async function ensureAdminUser(db: Database.Database, input: { email: str
   const passwordHash = hashPassword(parsed.password);
 
   if (existing) {
-    db.prepare(`
-      UPDATE users
-      SET role = 'admin', password_hash = ?, updated_at = ?
-      WHERE id = ?
-    `).run(passwordHash, timestamp, existing.id);
+    if (isPlaceholderAdminName(existing.name)) {
+      db.prepare(`
+        UPDATE users
+        SET name = ?, role = 'admin', password_hash = ?, updated_at = ?
+        WHERE id = ?
+      `).run(parsed.name, passwordHash, timestamp, existing.id);
+    } else {
+      db.prepare(`
+        UPDATE users
+        SET role = 'admin', password_hash = ?, updated_at = ?
+        WHERE id = ?
+      `).run(passwordHash, timestamp, existing.id);
+    }
     return getUserById(db, existing.id)!;
   }
 

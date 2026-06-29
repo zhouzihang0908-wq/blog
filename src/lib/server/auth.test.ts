@@ -67,7 +67,25 @@ describe('authentication and users', () => {
 
     const stored = getUserByEmail(db, 'ADMIN@example.com');
     expect(stored?.role).toBe('admin');
+    expect(stored?.name).toBe('站点管理员');
     expect(await verifyPassword(stored!.passwordHash, 'new-admin-password-456')).toBe(true);
+  });
+
+  it('repairs placeholder admin display names during bootstrap', async () => {
+    await createUser(db, {
+      email: 'bad-admin@example.com',
+      name: '?????',
+      password: 'old-password-123'
+    });
+
+    const repaired = await ensureAdminUser(db, {
+      email: 'bad-admin@example.com',
+      password: 'new-admin-password-456',
+      name: '站点管理员'
+    });
+
+    expect(repaired.name).toBe('站点管理员');
+    expect(repaired.role).toBe('admin');
   });
 
   it('uses bcrypt-compatible password hashes', async () => {

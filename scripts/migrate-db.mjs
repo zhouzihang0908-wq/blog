@@ -74,21 +74,27 @@ db.exec(`
 
 const adminEmail = process.env.BLOG_ADMIN_EMAIL?.trim().toLowerCase();
 const adminPassword = process.env.BLOG_ADMIN_PASSWORD;
+const adminName = '站点管理员';
+const isPlaceholderAdminName = (name) => typeof name === 'string' && (name.trim() === '' || /^\?+$/.test(name.trim()));
 if (adminEmail && adminPassword) {
   if (adminPassword.length < 8) {
     throw new Error('BLOG_ADMIN_PASSWORD must be at least 8 characters');
   }
   const now = new Date().toISOString();
   const passwordHash = bcrypt.hashSync(adminPassword, 12);
-  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(adminEmail);
+  const existing = db.prepare('SELECT id, name FROM users WHERE email = ?').get(adminEmail);
   if (existing) {
-    db.prepare("UPDATE users SET role = 'admin', password_hash = ?, updated_at = ? WHERE id = ?").run(passwordHash, now, existing.id);
+    if (isPlaceholderAdminName(existing.name)) {
+      db.prepare("UPDATE users SET name = ?, role = 'admin', password_hash = ?, updated_at = ? WHERE id = ?").run(adminName, passwordHash, now, existing.id);
+    } else {
+      db.prepare("UPDATE users SET role = 'admin', password_hash = ?, updated_at = ? WHERE id = ?").run(passwordHash, now, existing.id);
+    }
     console.log(`Promoted admin user: ${adminEmail}`);
   } else {
     db.prepare(`
       INSERT INTO users (id, email, name, password_hash, role, created_at, updated_at)
       VALUES (?, ?, ?, ?, 'admin', ?, ?)
-    `).run(`usr_${randomUUID()}`, adminEmail, '?????', passwordHash, now, now);
+    `).run(`usr_${randomUUID()}`, adminEmail, adminName, passwordHash, now, now);
     console.log(`Created admin user: ${adminEmail}`);
   }
 } else {
