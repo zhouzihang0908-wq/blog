@@ -74,7 +74,7 @@ describe('authentication and users', () => {
   it('repairs placeholder admin display names during bootstrap', async () => {
     await createUser(db, {
       email: 'bad-admin@example.com',
-      name: '?????',
+      name: '?'.repeat(5),
       password: 'old-password-123'
     });
 
