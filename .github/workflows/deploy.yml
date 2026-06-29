@@ -89,4 +89,4 @@ jobs:
           $SSH "docker run --rm --env-file $REMOTE_ROOT/.env -e HOST=0.0.0.0 -e PORT=4321 -v $REMOTE_ROOT:$REMOTE_ROOT -w $REMOTE_ROOT/current node:22-bookworm node scripts/migrate-db.mjs"
           $SSH "docker rm -f blog >/dev/null 2>&1 || true && docker run -d --name blog --restart unless-stopped --network proxy_newapi-network --env-file $REMOTE_ROOT/.env -e HOST=0.0.0.0 -e PORT=4321 -v $REMOTE_ROOT:$REMOTE_ROOT -w $REMOTE_ROOT/current node:22-bookworm node dist/server/entry.mjs"
           $SSH "sleep 2 && docker exec nginx nginx -s reload && docker exec nginx wget -qO- http://blog:4321/api/auth/me >/dev/null"
-          $SSH "find $REMOTE_ROOT/releases -mindepth 1 -maxdepth 1 -type d | sort -r | tail -n +4 | xargs -r rm -rf"
+          $SSH "docker run --rm -v $REMOTE_ROOT:$REMOTE_ROOT node:22-bookworm sh -lc 'find $REMOTE_ROOT/releases -mindepth 1 -maxdepth 1 -type d | sort -r | tail -n +4 | xargs -r rm -rf'"
