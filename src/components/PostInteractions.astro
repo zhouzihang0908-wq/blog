@@ -97,8 +97,11 @@ const loginHref = `/login/?next=${encodeURIComponent(`/posts/${slug}/`)}`;
 
     function renderComment(root, comment) {
       const status = comment.status === 'approved' ? '' : `<span class="notion-pill">${comment.status === 'pending' ? '待审核' : '已拒绝'}</span>`;
+      const user = root.__blogUser;
       const canReply = root.dataset.loggedIn === 'true' && !comment.parentId;
+      const canDelete = user && (user.role === 'admin' || user.id === comment.userId);
       const replyButton = canReply ? `<button class="notion-inline-button" type="button" data-reply-id="${escapeHtml(comment.id)}" data-reply-name="${escapeHtml(comment.authorName)}">回复</button>` : '';
+      const deleteButton = canDelete ? `<button class="notion-inline-button text-red-600" type="button" data-delete-comment="${escapeHtml(comment.id)}">删除</button>` : '';
       const replies = (comment.replies || []).map((reply) => `<div class="ml-4 mt-3 border-l pl-4" style="border-color: var(--border);">${renderComment(root, reply)}</div>`).join('');
       return `
         <article class="rounded-xl border p-4" style="border-color: var(--border); background: var(--bg-card);">
@@ -109,7 +112,7 @@ const loginHref = `/login/?next=${encodeURIComponent(`/posts/${slug}/`)}`;
             <time class="notion-muted" datetime="${escapeHtml(comment.createdAt)}">${new Date(comment.createdAt).toLocaleString('zh-CN')}</time>
           </div>
           <p class="mt-2 text-sm leading-7">${toLines(comment.body)}</p>
-          ${replyButton ? `<div class="mt-2">${replyButton}</div>` : ''}
+          ${replyButton || deleteButton ? `<div class="mt-2 flex flex-wrap gap-2">${replyButton}${deleteButton}</div>` : ''}
           ${replies}
         </article>`;
     }
@@ -140,7 +143,7 @@ const loginHref = `/login/?next=${encodeURIComponent(`/posts/${slug}/`)}`;
     }
 
     document.addEventListener('click', async (event) => {
-      const target = event.target.closest('[data-like], [data-favorite], [data-reply-id], [data-cancel-reply]');
+      const target = event.target.closest('[data-like], [data-favorite], [data-reply-id], [data-delete-comment], [data-cancel-reply]');
       if (!target) return;
       const root = target.closest('[data-post-interactions]');
       if (!root) return;
@@ -160,6 +163,21 @@ const loginHref = `/login/?next=${encodeURIComponent(`/posts/${slug}/`)}`;
         root.querySelector('input[name="parentId"]').value = '';
         root.querySelector('[data-replying-to]').classList.add('hidden');
         target.classList.add('hidden');
+        return;
+      }
+
+      if (target.matches('[data-delete-comment]')) {
+        if (!requireLogin(root)) return;
+        if (!window.confirm('确定删除这条评论吗？如果删除的是主评论，它的回复也会一起删除。')) return;
+        const slug = root.dataset.postSlug;
+        try {
+          await requestJson(`/api/comments/${encodeURIComponent(target.dataset.deleteComment)}`, { method: 'DELETE' });
+          setMessage(root, '评论已删除');
+          const comments = await requestJson(`/api/posts/${encodeURIComponent(slug)}/comments`);
+          renderComments(root, comments.comments || []);
+        } catch (error) {
+          setMessage(root, error.message || '删除评论失败', true);
+        }
         return;
       }
 

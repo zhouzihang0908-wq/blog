@@ -98,6 +98,17 @@ export function moderateComment(db: Database.Database, id: string, status: 'appr
   return rowToComment(row);
 }
 
+export function deleteComment(db: Database.Database, id: string, viewer: CommentViewer) {
+  const row = getCommentRow(db, id);
+  if (!row) throw new Error('Comment not found');
+  if (viewer.role !== 'admin' && row.user_id !== viewer.id) {
+    throw new Error('Permission denied');
+  }
+
+  db.prepare('DELETE FROM comments WHERE id = ?').run(id);
+  return { deleted: true, id };
+}
+
 export function listCommentsForPost(db: Database.Database, postSlug: string, viewer: CommentViewer | null) {
   const slug = normalizeSlug(postSlug);
   const rows = db.prepare(`
