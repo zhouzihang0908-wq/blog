@@ -34,10 +34,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Unit tests
+        run: pnpm test
+
       - name: Type/content check
         run: pnpm check
 
-      - name: Build static site
+      - name: Build SSR site
         run: pnpm build
 
       - name: Audit generated site
@@ -46,8 +49,13 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: blog-dist
-          path: dist
+          name: blog-ssr-release
+          path: |
+            dist
+            package.json
+            pnpm-lock.yaml
+            pnpm-workspace.yaml
+            scripts/migrate-db.mjs
           retention-days: 7
 
       - name: Deploy to server
@@ -58,6 +66,7 @@ jobs:
           BLOG_SSH_USER: ${{ secrets.BLOG_SSH_USER }}
           BLOG_SSH_KEY_B64: ${{ secrets.BLOG_SSH_KEY_B64 }}
           REMOTE_ROOT: /opt/proxy/blog
+          SERVICE_NAME: blog
         run: |
           set -euo pipefail
           test -n "$BLOG_SSH_HOST"
@@ -72,7 +81,9 @@ jobs:
           RELEASE="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
           SSH="ssh -i ~/.ssh/blog_deploy_key -p $BLOG_SSH_PORT -o IdentitiesOnly=yes $BLOG_SSH_USER@$BLOG_SSH_HOST"
           RSYNC_RSH="ssh -i ~/.ssh/blog_deploy_key -p $BLOG_SSH_PORT -o IdentitiesOnly=yes"
-          $SSH "mkdir -p $REMOTE_ROOT/releases/$RELEASE"
-          rsync -az --delete -e "$RSYNC_RSH" dist/ "$BLOG_SSH_USER@$BLOG_SSH_HOST:$REMOTE_ROOT/releases/$RELEASE/"
-          $SSH "ln -sfn $REMOTE_ROOT/releases/$RELEASE $REMOTE_ROOT/current && find $REMOTE_ROOT/releases -mindepth 1 -maxdepth 1 -type d | sort -r | tail -n +4 | xargs -r rm -rf"
-          $SSH "test -f $REMOTE_ROOT/current/index.html && test -f $REMOTE_ROOT/current/rss.xml && test -f $REMOTE_ROOT/current/404.html"
+          $SSH "mkdir -p $REMOTE_ROOT/releases/$RELEASE $REMOTE_ROOT/data"
+          rsync -az --delete -e "$RSYNC_RSH" dist package.json pnpm-lock.yaml pnpm-workspace.yaml scripts "$BLOG_SSH_USER@$BLOG_SSH_HOST:$REMOTE_ROOT/releases/$RELEASE/"
+          $SSH "cd $REMOTE_ROOT/releases/$RELEASE && corepack enable && pnpm install --prod --frozen-lockfile"
+          $SSH "cd $REMOTE_ROOT/releases/$RELEASE && set -a && [ ! -f $REMOTE_ROOT/.env ] || . $REMOTE_ROOT/.env && set +a && BLOG_DB_PATH=\${BLOG_DB_PATH:-$REMOTE_ROOT/data/blog.sqlite} node scripts/migrate-db.mjs"
+          $SSH "ln -sfn $REMOTE_ROOT/releases/$RELEASE $REMOTE_ROOT/current && sudo systemctl restart $SERVICE_NAME && sleep 2 && curl -fsS http://127.0.0.1:4321/ >/dev/null"
+          $SSH "find $REMOTE_ROOT/releases -mindepth 1 -maxdepth 1 -type d | sort -r | tail -n +4 | xargs -r rm -rf"

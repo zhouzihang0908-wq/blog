@@ -16,10 +16,39 @@ const currentPath = Astro.url.pathname;
     </div>
     <div class="flex items-center gap-2">
       <a class="notion-pill min-h-11" href="/search/">搜索</a>
+      <div class="flex items-center gap-2" data-auth-nav>
+        <a class="notion-pill min-h-11" href="/login/">登录</a>
+        <a class="notion-pill min-h-11" href="/register/">注册</a>
+      </div>
       <ThemeToggle />
     </div>
   </nav>
   <div class="notion-shell flex gap-2 overflow-x-auto pb-3 md:hidden">
     {SITE.nav.filter((item) => item.href !== '/search/').map((item) => <a class="notion-pill shrink-0" href={item.href}>{item.label}</a>)}
   </div>
-</header>
+  <script is:inline>
+    (() => {
+      if (window.__blogHeaderAuthInitialized) return;
+      window.__blogHeaderAuthInitialized = true;
+      const escapeHtml = (value) => String(value || '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+      window.addEventListener('DOMContentLoaded', async () => {
+        const target = document.querySelector('[data-auth-nav]');
+        if (!target) return;
+        try {
+          const response = await fetch('/api/auth/me', { credentials: 'same-origin' });
+          const data = await response.json();
+          if (!data.user) return;
+          target.innerHTML = `
+            <a class="notion-pill min-h-11" href="/account/">${escapeHtml(data.user.name)}</a>
+            ${data.user.role === 'admin' ? '<a class="notion-pill min-h-11" href="/admin/comments/">审核</a>' : ''}
+            <form action="/api/auth/logout" method="post">
+              <button class="notion-pill min-h-11 cursor-pointer" type="submit">退出</button>
+            </form>
+          `;
+        } catch {
+          // Keep the static login/register links if auth probing fails.
+        }
+      });
+    })();
+  </script>
+</header>

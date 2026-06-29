@@ -73,6 +73,33 @@
     font-size: 0.78rem;
     line-height: 1.1rem;
   }
+  .notion-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+    color: var(--text);
+    padding: 0.7rem 0.85rem;
+    line-height: 1.5;
+  }
+  .notion-input:disabled { cursor: not-allowed; opacity: 0.65; }
+  .notion-action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--text);
+    padding: 0.45rem 0.85rem;
+    font-size: 0.88rem;
+    transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+  }
+  .notion-action-button:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+  .notion-action-button.is-active { border-color: color-mix(in srgb, var(--accent) 58%, var(--border)); background: var(--accent-soft); color: var(--accent); }
+  .notion-inline-button { color: var(--accent); font-size: 0.85rem; }
+  .notion-inline-button:hover { text-decoration: underline; }
   .prose-notion { color: var(--text); font-size: 17px; line-height: 1.82; }
   .prose-notion :where(h1, h2, h3, h4) { color: var(--text); font-weight: 650; letter-spacing: -0.02em; scroll-margin-top: 5.5rem; }
   .prose-notion h1 { font-size: clamp(2.1rem, 5vw, 3.2rem); line-height: 1.15; margin: 0 0 1.4rem; }

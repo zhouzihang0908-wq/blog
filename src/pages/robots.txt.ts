@@ -1,3 +1,4 @@
+export const prerender = true;
 import { SITE } from '../site.config';
 
 export function GET() {

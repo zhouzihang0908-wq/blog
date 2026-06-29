@@ -1,0 +1,18 @@
+[Unit]
+Description=zzhgod Astro blog
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/proxy/blog/current
+EnvironmentFile=/opt/proxy/blog/.env
+Environment=HOST=127.0.0.1
+Environment=PORT=4321
+ExecStart=/usr/bin/node /opt/proxy/blog/current/dist/server/entry.mjs
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

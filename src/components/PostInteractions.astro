@@ -1,0 +1,214 @@
+---
+interface Props {
+  slug: string;
+}
+
+const { slug } = Astro.props;
+const loginHref = `/login/?next=${encodeURIComponent(`/posts/${slug}/`)}`;
+---
+<section class="notion-card mt-12 p-5" data-post-interactions data-post-slug={slug} data-login-href={loginHref} data-logged-in="false" data-pagefind-ignore>
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b pb-4" style="border-color: var(--border);">
+    <div>
+      <h2 class="text-xl font-semibold tracking-tight">互动</h2>
+      <p class="mt-1 text-sm notion-muted">登录后可以点赞、收藏和参与评论。</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <button class="notion-action-button" type="button" data-like aria-pressed="false">👍 点赞 <span data-like-count>0</span></button>
+      <button class="notion-action-button" type="button" data-favorite aria-pressed="false">⭐ 收藏 <span data-favorite-count>0</span></button>
+    </div>
+  </div>
+
+  <div class="mt-5">
+    <h3 class="text-lg font-semibold tracking-tight">评论</h3>
+    <div class="mt-4 grid gap-3" data-comments-list>
+      <p class="text-sm notion-muted">评论加载中...</p>
+    </div>
+
+    <form class="mt-5 grid gap-3" data-comment-form>
+      <input type="hidden" name="parentId" value="" />
+      <p class="hidden rounded-lg border px-3 py-2 text-sm notion-muted" style="border-color: var(--border); background: var(--bg-soft);" data-replying-to></p>
+      <label class="grid gap-2 text-sm font-medium">
+        发表评论
+        <textarea name="body" rows="4" maxlength="2000" class="notion-input min-h-28 resize-y" placeholder="写下你的想法，非管理员评论会先进入审核。"></textarea>
+      </label>
+      <div class="flex flex-wrap items-center gap-3">
+        <button class="notion-action-button" type="submit" data-comment-submit>提交评论</button>
+        <button class="notion-action-button hidden" type="button" data-cancel-reply>取消回复</button>
+        <a class="notion-pill" href={loginHref} data-login-link>登录 / 注册</a>
+      </div>
+      <p class="text-sm notion-muted" data-comment-message></p>
+    </form>
+  </div>
+</section>
+
+<script is:inline>
+  (() => {
+    if (window.__blogInteractionsInitialized) return;
+    window.__blogInteractionsInitialized = true;
+
+    const escapeHtml = (value) => String(value || '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
+    const toLines = (value) => escapeHtml(value).replace(/\n/g, '<br />');
+
+    async function requestJson(url, options = {}) {
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+        headers: { 'content-type': 'application/json', ...(options.headers || {}) },
+        ...options
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || '请求失败');
+      return data;
+    }
+
+    function setMessage(root, message, isError = false) {
+      const target = root.querySelector('[data-comment-message]');
+      if (!target) return;
+      target.textContent = message || '';
+      target.style.color = isError ? '#dc2626' : '';
+    }
+
+    function updateButtons(root, interactions, user) {
+      root.dataset.loggedIn = user ? 'true' : 'false';
+      root.__blogUser = user || null;
+      root.__blogInteractions = interactions;
+
+      const like = root.querySelector('[data-like]');
+      const favorite = root.querySelector('[data-favorite]');
+      root.querySelector('[data-like-count]').textContent = String(interactions.likeCount ?? 0);
+      root.querySelector('[data-favorite-count]').textContent = String(interactions.favoriteCount ?? 0);
+      like.setAttribute('aria-pressed', interactions.liked ? 'true' : 'false');
+      favorite.setAttribute('aria-pressed', interactions.favorited ? 'true' : 'false');
+      like.classList.toggle('is-active', Boolean(interactions.liked));
+      favorite.classList.toggle('is-active', Boolean(interactions.favorited));
+
+      const submit = root.querySelector('[data-comment-submit]');
+      const textarea = root.querySelector('textarea[name="body"]');
+      const loginLink = root.querySelector('[data-login-link]');
+      if (user) {
+        submit.textContent = '提交评论';
+        textarea.disabled = false;
+        loginLink.classList.add('hidden');
+      } else {
+        submit.textContent = '登录后评论';
+        textarea.disabled = true;
+        loginLink.classList.remove('hidden');
+      }
+    }
+
+    function renderComment(root, comment) {
+      const status = comment.status === 'approved' ? '' : `<span class="notion-pill">${comment.status === 'pending' ? '待审核' : '已拒绝'}</span>`;
+      const canReply = root.dataset.loggedIn === 'true' && !comment.parentId;
+      const replyButton = canReply ? `<button class="notion-inline-button" type="button" data-reply-id="${escapeHtml(comment.id)}" data-reply-name="${escapeHtml(comment.authorName)}">回复</button>` : '';
+      const replies = (comment.replies || []).map((reply) => `<div class="ml-4 mt-3 border-l pl-4" style="border-color: var(--border);">${renderComment(root, reply)}</div>`).join('');
+      return `
+        <article class="rounded-xl border p-4" style="border-color: var(--border); background: var(--bg-card);">
+          <div class="flex flex-wrap items-center gap-2 text-sm">
+            <strong>${escapeHtml(comment.authorName)}</strong>
+            ${comment.authorRole === 'admin' ? '<span class="notion-pill">管理员</span>' : ''}
+            ${status}
+            <time class="notion-muted" datetime="${escapeHtml(comment.createdAt)}">${new Date(comment.createdAt).toLocaleString('zh-CN')}</time>
+          </div>
+          <p class="mt-2 text-sm leading-7">${toLines(comment.body)}</p>
+          ${replyButton ? `<div class="mt-2">${replyButton}</div>` : ''}
+          ${replies}
+        </article>`;
+    }
+
+    function renderComments(root, comments) {
+      const list = root.querySelector('[data-comments-list]');
+      if (!comments.length) {
+        list.innerHTML = '<p class="text-sm notion-muted">还没有公开评论，来写第一条吧。</p>';
+        return;
+      }
+      list.innerHTML = comments.map((comment) => renderComment(root, comment)).join('');
+    }
+
+    async function loadInteractions(root) {
+      const slug = root.dataset.postSlug;
+      const [interactionData, commentData] = await Promise.all([
+        requestJson(`/api/posts/${encodeURIComponent(slug)}/interactions`),
+        requestJson(`/api/posts/${encodeURIComponent(slug)}/comments`)
+      ]);
+      updateButtons(root, interactionData.interactions, interactionData.user);
+      renderComments(root, commentData.comments || []);
+    }
+
+    function requireLogin(root) {
+      if (root.dataset.loggedIn === 'true') return true;
+      window.location.href = root.dataset.loginHref || '/login/';
+      return false;
+    }
+
+    document.addEventListener('click', async (event) => {
+      const target = event.target.closest('[data-like], [data-favorite], [data-reply-id], [data-cancel-reply]');
+      if (!target) return;
+      const root = target.closest('[data-post-interactions]');
+      if (!root) return;
+
+      if (target.matches('[data-reply-id]')) {
+        if (!requireLogin(root)) return;
+        root.querySelector('input[name="parentId"]').value = target.dataset.replyId;
+        const label = root.querySelector('[data-replying-to]');
+        label.textContent = `正在回复 ${target.dataset.replyName}`;
+        label.classList.remove('hidden');
+        root.querySelector('[data-cancel-reply]').classList.remove('hidden');
+        root.querySelector('textarea[name="body"]').focus();
+        return;
+      }
+
+      if (target.matches('[data-cancel-reply]')) {
+        root.querySelector('input[name="parentId"]').value = '';
+        root.querySelector('[data-replying-to]').classList.add('hidden');
+        target.classList.add('hidden');
+        return;
+      }
+
+      if (!requireLogin(root)) return;
+      const slug = root.dataset.postSlug;
+      try {
+        if (target.matches('[data-like]')) {
+          const liked = target.getAttribute('aria-pressed') !== 'true';
+          const data = await requestJson(`/api/posts/${encodeURIComponent(slug)}/like`, { method: 'PUT', body: JSON.stringify({ liked }) });
+          updateButtons(root, data.interactions, root.__blogUser);
+        }
+        if (target.matches('[data-favorite]')) {
+          const favorited = target.getAttribute('aria-pressed') !== 'true';
+          const data = await requestJson(`/api/posts/${encodeURIComponent(slug)}/favorite`, { method: 'PUT', body: JSON.stringify({ favorited }) });
+          updateButtons(root, data.interactions, root.__blogUser);
+        }
+      } catch (error) {
+        setMessage(root, error.message || '操作失败', true);
+      }
+    });
+
+    document.addEventListener('submit', async (event) => {
+      const form = event.target.closest('[data-comment-form]');
+      if (!form) return;
+      event.preventDefault();
+      const root = form.closest('[data-post-interactions]');
+      if (!requireLogin(root)) return;
+      const slug = root.dataset.postSlug;
+      const formData = new FormData(form);
+      try {
+        const data = await requestJson(`/api/posts/${encodeURIComponent(slug)}/comments`, {
+          method: 'POST',
+          body: JSON.stringify({ body: formData.get('body'), parentId: formData.get('parentId') || null })
+        });
+        form.reset();
+        root.querySelector('[data-replying-to]').classList.add('hidden');
+        root.querySelector('[data-cancel-reply]').classList.add('hidden');
+        setMessage(root, data.message || '评论已提交');
+        const comments = await requestJson(`/api/posts/${encodeURIComponent(slug)}/comments`);
+        renderComments(root, comments.comments || []);
+      } catch (error) {
+        setMessage(root, error.message || '评论失败', true);
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-post-interactions]').forEach((root) => {
+        loadInteractions(root).catch((error) => setMessage(root, error.message || '互动加载失败', true));
+      });
+    });
+  })();
+</script>

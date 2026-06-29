@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import { getDb } from '../lib/server/db';
+import { listFavoriteSlugs } from '../lib/server/interactions';
+import { entrySlug, getPublishedPosts } from '../lib/content';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) {
+  return Astro.redirect('/login/?next=/account/');
+}
+
+const favoriteSlugs = new Set(listFavoriteSlugs(getDb(), user.id));
+const favoritePosts = (await getPublishedPosts()).filter((post) => favoriteSlugs.has(entrySlug(post)));
+---
+<BaseLayout title="个人中心" description="管理博客账号和收藏。" noindex={true}>
+  <section class="notion-card p-6">
+    <p class="notion-pill mb-4 w-fit">个人中心</p>
+    <h1 class="text-3xl font-semibold tracking-tight">{user.name}</h1>
+    <p class="mt-2 notion-muted">{user.email} · {user.role === 'admin' ? '管理员' : '普通用户'}</p>
+    <div class="mt-5 flex flex-wrap gap-3">
+      {user.role === 'admin' && <a class="notion-action-button" href="/admin/comments/">评论审核</a>}
+      <form action="/api/auth/logout" method="post"><button class="notion-action-button" type="submit">退出登录</button></form>
+    </div>
+  </section>
+
+  <section class="mt-8">
+    <div class="mb-4 flex items-center justify-between gap-4">
+      <h2 class="text-2xl font-semibold tracking-tight">我的收藏</h2>
+      <span class="text-sm notion-muted">{favoritePosts.length} 篇</span>
+    </div>
+    {favoritePosts.length ? <div class="grid gap-4">{favoritePosts.map((post) => <ArticleCard post={post} />)}</div> : <p class="notion-card p-5 text-sm notion-muted">还没有收藏文章。</p>}
+  </section>
+</BaseLayout>

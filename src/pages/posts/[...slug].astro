@@ -2,8 +2,11 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Callout from '../../components/Callout.astro';
+import PostInteractions from '../../components/PostInteractions.astro';
 import TagPill from '../../components/TagPill.astro';
 import { entrySlug, formatDate, getPublishedPosts, readingTime } from '../../lib/content';
+
+export const prerender = true;
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts', ({ data }) => !data.draft);
@@ -11,9 +14,10 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
+const slug = entrySlug(post);
 const { Content, headings } = await render(post);
 const allPosts = await getPublishedPosts();
-const index = allPosts.findIndex((item) => entrySlug(item) === entrySlug(post));
+const index = allPosts.findIndex((item) => entrySlug(item) === slug);
 const prev = allPosts[index + 1];
 const next = allPosts[index - 1];
 ---
@@ -41,9 +45,11 @@ const next = allPosts[index - 1];
 
     <div class="prose-notion"><Content components={{ Callout }} /></div>
 
+    <PostInteractions slug={slug} />
+
     <nav class="mt-12 grid gap-3 border-t pt-6 md:grid-cols-2" style="border-color: var(--border);" data-pagefind-ignore>
       {prev ? <a class="notion-card p-4" href={`/posts/${entrySlug(prev)}/`}><span class="text-sm notion-muted">上一篇</span><p class="mt-1 font-medium">{prev.data.title}</p></a> : <div></div>}
       {next ? <a class="notion-card p-4 md:text-right" href={`/posts/${entrySlug(next)}/`}><span class="text-sm notion-muted">下一篇</span><p class="mt-1 font-medium">{next.data.title}</p></a> : <div></div>}
     </nav>
   </article>
-</BaseLayout>
+</BaseLayout>

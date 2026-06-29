@@ -1,0 +1,49 @@
+---
+export const prerender = true;
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="??" description="?? zzhgod ?????" noindex={true}>
+  <section class="notion-card mx-auto max-w-lg p-6" data-auth-page="register">
+    <p class="notion-pill mb-4 w-fit">??</p>
+    <h1 class="text-3xl font-semibold tracking-tight">??</h1>
+    <p class="mt-3 text-sm notion-muted">??????????????????????</p>
+    <form class="mt-6 grid gap-4" data-register-form>
+      <label class="grid gap-2 text-sm font-medium">??
+        <input class="notion-input" type="text" name="name" autocomplete="nickname" maxlength="60" required />
+      </label>
+      <label class="grid gap-2 text-sm font-medium">??
+        <input class="notion-input" type="email" name="email" autocomplete="email" required />
+      </label>
+      <label class="grid gap-2 text-sm font-medium">??
+        <input class="notion-input" type="password" name="password" autocomplete="new-password" minlength="8" required />
+      </label>
+      <button class="notion-action-button min-h-11 justify-center" type="submit">?????</button>
+      <p class="text-sm notion-muted">?????<a class="text-[var(--accent)] hover:underline" href="/login/">???</a></p>
+      <p class="text-sm" data-auth-message></p>
+    </form>
+  </section>
+  <script is:inline>
+    (() => {
+      const form = document.querySelector('[data-register-form]');
+      const message = document.querySelector('[data-auth-message]');
+      form?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        message.textContent = '???...';
+        const formData = new FormData(form);
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ name: formData.get('name'), email: formData.get('email'), password: formData.get('password') })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          message.textContent = data.error || '????';
+          message.style.color = '#dc2626';
+          return;
+        }
+        location.href = data.next || '/account/';
+      });
+    })();
+  </script>
+</BaseLayout>

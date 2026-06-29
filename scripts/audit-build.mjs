@@ -2,7 +2,9 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
+const distRoot = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
+const root = existsSync(join(distRoot, 'client')) ? join(distRoot, 'client') : distRoot;
+const serverRoot = join(distRoot, 'server');
 const required = [
   'index.html',
   'posts/index.html',
@@ -18,6 +20,9 @@ const required = [
 ];
 
 const missing = required.filter((file) => !existsSync(join(root, file)));
+if (existsSync(serverRoot) && !existsSync(join(serverRoot, 'entry.mjs'))) {
+  missing.push('server/entry.mjs');
+}
 if (missing.length) {
   console.error('Missing build outputs:', missing.join(', '));
   process.exit(1);

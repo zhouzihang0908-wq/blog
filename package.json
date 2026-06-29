@@ -6,24 +6,32 @@
   "scripts": {
     "dev": "astro dev",
     "check": "astro check",
-    "build": "astro build && pagefind --site dist",
+    "build": "astro build && pagefind --site dist/client",
     "preview": "astro preview",
-    "audit:build": "node scripts/audit-build.mjs"
+    "audit:build": "node scripts/audit-build.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@astrojs/mdx": "latest",
+    "@astrojs/node": "^11.0.0",
     "@astrojs/rss": "latest",
     "@astrojs/sitemap": "latest",
-    "astro": "latest"
+    "astro": "latest",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.11.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@astrojs/check": "latest",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "latest",
     "autoprefixer": "latest",
     "pagefind": "latest",
     "postcss": "latest",
     "tailwindcss": "^3.4.17",
-    "typescript": "latest"
+    "typescript": "latest",
+    "vitest": "^4.1.9"
   },
   "packageManager": "pnpm@11.7.0"
 }
