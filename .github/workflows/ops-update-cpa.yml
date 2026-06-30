@@ -1,0 +1,42 @@
+﻿name: Ops update CPA once
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update-cpa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Install sshpass
+        run: |
+          set -euo pipefail
+          sudo apt-get update -y >/dev/null
+          sudo apt-get install -y sshpass >/dev/null
+      - name: Update CPA on server
+        env:
+          OPS_SSH_HOST: ${{ secrets.OPS_SSH_HOST }}
+          OPS_SSH_PORT: ${{ secrets.OPS_SSH_PORT }}
+          OPS_SSH_USER: ${{ secrets.OPS_SSH_USER }}
+          SSHPASS: ${{ secrets.OPS_SSH_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$OPS_SSH_HOST"
+          test -n "$OPS_SSH_PORT"
+          test -n "$OPS_SSH_USER"
+          test -n "$SSHPASS"
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "$OPS_SSH_PORT" "$OPS_SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+          sshpass -e ssh -p "$OPS_SSH_PORT" -o StrictHostKeyChecking=no -o UserKnownHostsFile=~/.ssh/known_hosts -o ConnectTimeout=20 "$OPS_SSH_USER@$OPS_SSH_HOST" 'bash -se' <<'REMOTE'
+          set -euo pipefail
+          cd /opt/proxy
+          echo '--- dry run ---'
+          /opt/proxy/update-cpa.sh --dry-run --no-manager
+          echo '--- update ---'
+          /opt/proxy/update-cpa.sh --no-manager
+          echo '--- verify ---'
+          docker compose config >/tmp/gha-update-cpa-compose-ok.yml
+          docker inspect cpa --format 'cpa image={{.Config.Image}} image_id={{.Image}} status={{.State.Status}} started={{.State.StartedAt}} restart={{.RestartCount}}'
+          docker logs --tail 120 cpa 2>&1 | grep -E 'CLIProxyAPI Version|API server started|configuration updated|BuiltAt|Commit' | tail -n 20 || true
+          docker exec cpa-manager sh -lc 'wget -qS -O /tmp/cpa-api-root.json http://cpa:8317/ 2>/tmp/cpa-api-root.headers; cat /tmp/cpa-api-root.headers; cat /tmp/cpa-api-root.json' | sed -n '1,80p'
+          REMOTE
