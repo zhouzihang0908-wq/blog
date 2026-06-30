@@ -29,6 +29,7 @@ jobs:
           ssh-keyscan -p "$OPS_SSH_PORT" "$OPS_SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
           sshpass -e ssh -p "$OPS_SSH_PORT" -o StrictHostKeyChecking=no -o UserKnownHostsFile=~/.ssh/known_hosts -o ConnectTimeout=20 "$OPS_SSH_USER@$OPS_SSH_HOST" 'bash -se' <<'REMOTE'
           set -euo pipefail
+          export LC_ALL=C.UTF-8 LANG=C.UTF-8 PYTHONIOENCODING=utf-8
           cd /opt/proxy
           echo '--- dry run ---'
           /opt/proxy/update-cpa.sh --dry-run --no-manager
